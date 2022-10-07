@@ -6,11 +6,12 @@ from django.utils.translation import gettext_lazy as _
 from .validators import CCNumberValidator, CSCValidator
 from . import forms
 from . import utils
+from encrypted_model_fields.fields import EncryptedCharField, EncryptedDateField
 
 __all__ = ['CardNumberField', 'CardExpiryField', 'SecurityCodeField']
 
 
-class CardNumberField(models.CharField):
+class CardNumberField(EncryptedCharField):
     default_validators = [
         MinLengthValidator(13),
         CCNumberValidator(),
@@ -31,7 +32,7 @@ class CardNumberField(models.CharField):
         })
 
 
-class CardExpiryField(models.DateField):
+class CardExpiryField(EncryptedDateField):
     input_formats = ['%m/%y', '%m/%Y', '%Y-%m-%d']
     default_error_messages = {
         'invalid': _("'%(value)s' value has an invalid date format. "
@@ -42,6 +43,7 @@ class CardExpiryField(models.DateField):
     def to_python(self, value):
         if value is None:
             return value
+        value = super().to_python(value)
         if isinstance(value, (datetime.datetime, datetime.date)):
             return utils.expiry_date(value.year, value.month)
 
@@ -67,7 +69,7 @@ class CardExpiryField(models.DateField):
         })
 
 
-class SecurityCodeField(models.CharField):
+class SecurityCodeField(EncryptedCharField):
     default_validators = [CSCValidator()]
     description = _("Card security code")
 
