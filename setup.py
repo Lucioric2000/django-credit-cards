@@ -23,6 +23,7 @@ VERSION = '0.4.1'
 # What packages are required for this module to be executed?
 REQUIRED = [
     'django>=1.8',
+    'django-encrypted-model-fields'
 ]
 
 # What packages are optional?
