@@ -30,6 +30,28 @@ class CCNumberValidator:
 
 
 @deconstructible
+class AccountNumberValidator:
+    message = _('Enter a valid account number.')
+    code = 'invalid'
+
+    def __init__(self, message=None, code=None):
+        if message is not None:
+            self.message = message
+        if code is not None:
+            self.code = code
+
+    def __call__(self, value):
+        if not utils.get_digits(value).isdigit():
+            raise ValidationError(self.message, code=self.code)
+
+    def __eq__(self, other):
+        return (
+                isinstance(other, self.__class__) and
+                (self.message == other.message) and
+                (self.code == other.code)
+        )
+
+@deconstructible
 class CSCValidator(RegexValidator):
     regex = r'^\d{3,4}$'
     message = _('Enter a valid security code.')

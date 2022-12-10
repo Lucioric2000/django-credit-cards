@@ -3,12 +3,33 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
-from .validators import CCNumberValidator, CSCValidator
+from .validators import CCNumberValidator, CSCValidator, AccountNumberValidator
 from . import forms
 from . import utils
 from encrypted_model_fields.fields import EncryptedCharField, EncryptedDateField
 
-__all__ = ['CardNumberField', 'CardExpiryField', 'SecurityCodeField']
+__all__ = ['AccountNumberField', 'CardNumberField', 'CardExpiryField', 'SecurityCodeField']
+
+
+class AccountNumberField(EncryptedCharField):
+    default_validators = [
+        MinLengthValidator(13),
+        AccountNumberValidator(),
+    ]
+    description = _("Account number")
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('max_length', 25)
+        super().__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        return utils.get_digits(super().to_python(value))
+
+    def formfield(self, **kwargs):
+        return super().formfield(**{
+            'form_class': forms.CardNumberField,
+            **kwargs,
+        })
 
 
 class CardNumberField(EncryptedCharField):

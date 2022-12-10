@@ -1,7 +1,7 @@
 import datetime
 from django import forms
 from django.core.validators import MinLengthValidator, MaxLengthValidator
-from .validators import CCNumberValidator, CSCValidator, ExpiryDateValidator
+from .validators import CCNumberValidator, CSCValidator, ExpiryDateValidator, AccountNumberValidator
 from .widgets import TelephoneInput, ExpiryDateWidget
 from . import utils
 
@@ -24,6 +24,29 @@ class CardNumberField(forms.CharField):
         attrs.update({
             'pattern': r'[-\d\s]*',
             'autocomplete': 'cc-number',
+            'autocorrect': 'off',
+            'spellcheck': 'off',
+            'autocapitalize': 'off',
+        })
+        return attrs
+
+
+class AccountNumberField(forms.CharField):
+    widget = TelephoneInput
+    default_validators = [
+        MinLengthValidator(12),
+        MaxLengthValidator(25),
+        AccountNumberValidator(),
+    ]
+
+    def to_python(self, value):
+        return utils.get_digits(super().to_python(value))
+
+    def widget_attrs(self, widget):
+        attrs = super().widget_attrs(widget)
+        attrs.update({
+            'pattern': r'[-\d\s]*',
+            'autocomplete': 'account-number',
             'autocorrect': 'off',
             'spellcheck': 'off',
             'autocapitalize': 'off',
